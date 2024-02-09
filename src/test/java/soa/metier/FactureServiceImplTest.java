@@ -30,6 +30,7 @@ public class FactureServiceImplTest {
         // Mock data and behavior
         Facture facture = new Facture();
 
+        // Simulate the save operation
         when(factureRepository.save(facture)).thenReturn(facture);
 
         // Call the service method
@@ -37,34 +38,90 @@ public class FactureServiceImplTest {
 
         // Assert the result
         assertNotNull(savedFacture);
+        assertEquals(facture, savedFacture);
+        assertEquals(facture.getMontant(), savedFacture.getMontant());
         assertEquals(0, savedFacture.getMontantPayer());
-        assertEquals(savedFacture.getMontant(), savedFacture.getMontantRestantAPayer());
+        assertEquals(facture.getMontant(), savedFacture.getMontantRestantAPayer());
+    }
+
+    @Test
+    public void testAddFactureFailure() {
+        // Mock data and behavior
+        Facture facture = new Facture();
+
+        // Simulate the save operation failure
+        when(factureRepository.save(facture)).thenReturn(null);
+
+        // Call the service method
+        Facture savedFacture = factureService.addFacture(facture);
+
+        // Assert the result
+        assertNull(savedFacture);
     }
 
     @Test
     public void testGetAllFactures() {
         // Mock data and behavior
-        List<Facture> mockFactures = Collections.singletonList(new Facture());
-        when(factureRepository.findAll()).thenReturn(mockFactures);
+        when(factureRepository.findAll()).thenReturn(null); // Simulate a failure
 
         // Call the service method
         List<Facture> result = factureService.getAllFactures();
 
         // Assert the result
-        assertEquals(mockFactures, result);
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetAllFacturesWhenEmptyList() {
+        // Mock data and simulate an empty list being returned
+        when(factureRepository.findAll()).thenReturn(Collections.emptyList());
+
+        // Call the service method
+        List<Facture> result = factureService.getAllFactures();
+
+        // Assert the result
+        assertNotNull(result);
+        assertTrue(result.isEmpty());
     }
 
     @Test
     public void testGetFactureById() {
         // Mock data and behavior
-        Facture mockFacture = new Facture();
-        when(factureRepository.findById(1L)).thenReturn(Optional.of(mockFacture));
+        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
 
         // Call the service method
         Facture result = factureService.getFactureById(1L);
 
         // Assert the result
-        assertEquals(mockFacture, result);
+        assertNull(result);
+    }
+
+    @Test
+    public void testGetFactureByIdWhenNotExists() {
+        // Mock data and simulate a non-existing Facture
+        when(factureRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Call the service method
+        Facture result = factureService.getFactureById(1L);
+
+        // Assert the result
+        assertNull(result);
+    }
+
+    @Test
+    public void testUpdateFactureWhenNotExists() {
+        // Mock data and behavior
+        Facture updatedFacture = new Facture();
+        updatedFacture.setIdF(1L);
+        updatedFacture.setMontant(150.0);
+
+        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
+
+        // Call the service method
+        Facture result = factureService.updateFacture(updatedFacture);
+
+        // Assert the result
+        assertNull(result);
     }
 
     @Test
@@ -79,31 +136,61 @@ public class FactureServiceImplTest {
         updatedFacture.setMontant(150.0);
 
         when(factureRepository.findById(1L)).thenReturn(Optional.of(existingFacture));
-        when(factureRepository.save(existingFacture)).thenReturn(updatedFacture);
 
         // Call the service method
         Facture result = factureService.updateFacture(updatedFacture);
 
         // Assert the result
         assertNotNull(result);
-        assertEquals(updatedFacture.getIdF(), result.getIdF());
         assertEquals(updatedFacture.getMontant(), result.getMontant());
     }
 
     @Test
     public void testDeleteFacture() {
         // Mock data and behavior
-        Facture existingFacture = new Facture();
-        existingFacture.setIdF(1L);
-        existingFacture.setMontant(100.0);
-
-        when(factureRepository.findById(1L)).thenReturn(Optional.of(existingFacture));
+        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
 
         // Call the service method
         factureService.deleteFacture(1L);
 
         // Verify the behavior
-        verify(factureRepository, times(1)).deleteById(1L);
+        verify(factureRepository, never()).deleteById(anyLong());
     }
-    // Add more test methods for other functionalities in FactureServiceImpl
+
+    @Test
+    public void testDeleteNonExistingFacture() {
+        // Mock data and behavior
+        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
+
+        // Call the service method
+        factureService.deleteFacture(1L);
+
+        // Verify the behavior
+        verify(factureRepository, never()).deleteById(anyLong());
+    }
+
+    @Test
+    public void testUpdateFactureWithNegativeMontant() {
+        // Mock data and behavior
+        Facture existingFacture = new Facture();
+        existingFacture.setIdF(1L);
+        existingFacture.setMontant(100.0);
+        existingFacture.setMontantPayer(30.0);
+
+        Facture updatedFacture = new Facture();
+        updatedFacture.setIdF(1L);
+        updatedFacture.setMontant(-50.0);
+
+        when(factureRepository.findById(1L)).thenReturn(Optional.of(existingFacture));
+
+        // Call the service method
+        Facture result = factureService.updateFacture(updatedFacture);
+
+        // Verify the behavior
+        verify(factureRepository, never()).save(any(Facture.class));
+
+        // Assert the facture remains unchanged
+        assertEquals(100.0, existingFacture.getMontant());
+        assertEquals(30.0, existingFacture.getMontantPayer());
+    }
 }

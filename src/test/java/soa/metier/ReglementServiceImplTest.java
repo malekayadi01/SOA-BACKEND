@@ -1,4 +1,4 @@
-// FactureServiceImplTest.java
+// ReglementServiceImplTest.java
 package soa.metier;
 
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import soa.entities.Facture;
-import soa.repository.FactureRepository;
+import soa.entities.Reglement;
+import soa.repository.ReglementRepository;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,67 +18,76 @@ import static org.mockito.Mockito.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
-public class FactureServiceImplTest {
+public class ReglementServiceImplTest {
 
     @Mock
-    private FactureRepository factureRepository;
+    private ReglementRepository reglementRepository;
+
+    @Mock
+    private FactureServiceInterface factureService;
 
     @InjectMocks
-    private FactureServiceImpl factureService;
+    private ReglementServiceImpl reglementService;
 
     @Test
-    public void testAddFacture() {
+    public void testAddReglement() {
         // Mock data and behavior
-        Facture facture = new Facture();
-
-        // Simulate the save operation
-        when(factureRepository.save(facture)).thenReturn(facture);
-
-        // Call the service method
-        Facture savedFacture = factureService.addFacture(facture);
-
-        // Assert the result
-        assertNotNull(savedFacture);
-        assertEquals(facture, savedFacture);
-        assertEquals(facture.getMontant(), savedFacture.getMontant());
-        assertEquals(0, savedFacture.getMontantPayer());
-        assertEquals(facture.getMontant(), savedFacture.getMontantRestantAPayer());
-    }
-
-    @Test
-    public void testAddFactureFailure() {
-        // Mock data and behavior
-        Facture facture = new Facture();
+        Reglement reglement = new Reglement();
+        Facture associatedFacture = new Facture(); // Set up an associated facture
+        reglement.setFacture(associatedFacture);
 
         // Simulate the save operation failure
-        when(factureRepository.save(facture)).thenReturn(null);
+        when(reglementRepository.save(reglement)).thenReturn(null);
 
         // Call the service method
-        Facture savedFacture = factureService.addFacture(facture);
+        Reglement savedReglement = reglementService.addReglement(reglement);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
 
         // Assert the result
-        assertNull(savedFacture);
+        assertNull(savedReglement);
+    }
+    @Test
+    public void testAddReglementFailure() {
+        // Mock data and behavior
+        Reglement reglement = new Reglement();
+        Facture associatedFacture = new Facture(); // Set up an associated facture
+        reglement.setFacture(associatedFacture);
+
+        // Simulate the save operation failure
+        when(reglementRepository.save(reglement)).thenReturn(null); // or use thenThrow(new SomeExceptionType("message")) to simulate an exception
+
+        // Call the service method
+        Reglement savedReglement = reglementService.addReglement(reglement);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+
+        // Assert the result
+        assertNull(savedReglement);
     }
 
     @Test
-    public void testGetAllFactures() {
+    public void testGetAllReglements() {
         // Mock data and behavior
-        when(factureRepository.findAll()).thenReturn(null); // Simulate a failure
+        when(reglementRepository.findAll()).thenReturn(null); // Simulate a failure
 
         // Call the service method
-        List<Facture> result = factureService.getAllFactures();
+        List<Reglement> result = reglementService.getAllReglements();
 
         // Assert the result
         assertNull(result);
     }
-
     @Test
-    public void testGetAllFacturesWhenEmptyList() {
+    public void testGetAllReglementsWhenEmptyList() {
         // Mock data and simulate an empty list being returned
-        when(factureRepository.findAll()).thenReturn(Collections.emptyList());
+        when(reglementRepository.findAll()).thenReturn(Collections.emptyList());
 
         // Call the service method
-        List<Facture> result = factureService.getAllFactures();
+        List<Reglement> result = reglementService.getAllReglements();
 
         // Assert the result
         assertNotNull(result);
@@ -85,112 +95,124 @@ public class FactureServiceImplTest {
     }
 
     @Test
-    public void testGetFactureById() {
+    public void testGetReglementById() {
         // Mock data and behavior
-        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing reglement
 
         // Call the service method
-        Facture result = factureService.getFactureById(1L);
+        Reglement result = reglementService.getReglementById(1L);
+
+        // Assert the result
+        assertNull(result);
+    }
+    @Test
+    public void testGetReglementByIdWhenNotExists() {
+        // Mock data and simulate a non-existing Reglement
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty());
+
+        // Call the service method
+        Reglement result = reglementService.getReglementById(1L);
 
         // Assert the result
         assertNull(result);
     }
 
     @Test
-    public void testGetFactureByIdWhenNotExists() {
-        // Mock data and simulate a non-existing Facture
-        when(factureRepository.findById(1L)).thenReturn(Optional.empty());
+    public void testUpdateReglement() {
+        // Mock data and behavior
+        Reglement existingReglement = new Reglement();
+        existingReglement.setIdR(1L);
+        existingReglement.setMontant((int) 100.0);
+        existingReglement.setFacture(new Facture()); // Set up an associated facture
+
+        Reglement updatedReglement = new Reglement();
+        updatedReglement.setIdR(1L);
+        updatedReglement.setMontant((int) 150.0);
+
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing reglement
 
         // Call the service method
-        Facture result = factureService.getFactureById(1L);
+        Reglement result = reglementService.updateReglement(updatedReglement);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(reglementRepository, never()).save(any(Reglement.class));
+
+        // Assert the result
+        assertNull(result);
+    }
+    @Test
+    public void testUpdateReglementWhenNotExists() {
+        // Mock data and behavior
+        Reglement updatedReglement = new Reglement();
+        updatedReglement.setIdR(1L);
+        updatedReglement.setMontant((int) 150.0);
+
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing reglement
+
+        // Call the service method
+        Reglement result = reglementService.updateReglement(updatedReglement);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(reglementRepository, never()).save(any(Reglement.class));
 
         // Assert the result
         assertNull(result);
     }
 
     @Test
-    public void testUpdateFactureWhenNotExists() {
+    public void testDeleteReglement() {
         // Mock data and behavior
-        Facture updatedFacture = new Facture();
-        updatedFacture.setIdF(1L);
-        updatedFacture.setMontant(150.0);
-
-        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing reglement
 
         // Call the service method
-        Facture result = factureService.updateFacture(updatedFacture);
+        reglementService.deleteReglement(1L);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(reglementRepository, never()).deleteById(anyLong());
+    }
+    @Test
+    public void testDeleteNonExistingReglement() {
+        // Mock data and behavior
+        when(reglementRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing reglement
+
+        // Call the service method
+        reglementService.deleteReglement(1L);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(reglementRepository, never()).deleteById(anyLong());
+    }
+    @Test
+    public void testUpdateReglementWithNegativeMontant() {
+        // Mock data and behavior
+        Reglement existingReglement = new Reglement();
+        existingReglement.setIdR(1L);
+        existingReglement.setMontant((int) 100.0);
+        existingReglement.setFacture(new Facture()); // Set up an associated facture
+
+        Reglement updatedReglement = new Reglement();
+        updatedReglement.setIdR(1L);
+        updatedReglement.setMontant((int) -50.0);
+
+        when(reglementRepository.findById(1L)).thenReturn(Optional.of(existingReglement));
+
+        // Call the service method
+        Reglement result = reglementService.updateReglement(updatedReglement);
+
+        // Verify the behavior
+        verify(factureService, never()).updateMontantPayer(anyLong(), anyDouble());
+        verify(factureService, never()).updateMontantRestantAPayer(anyLong(), anyDouble());
+        verify(reglementRepository, times(1)).save(any(Reglement.class));
 
         // Assert the result
         assertNull(result);
     }
 
-    @Test
-    public void testUpdateFacture() {
-        // Mock data and behavior
-        Facture existingFacture = new Facture();
-        existingFacture.setIdF(1L);
-        existingFacture.setMontant(100.0);
-
-        Facture updatedFacture = new Facture();
-        updatedFacture.setIdF(1L);
-        updatedFacture.setMontant(150.0);
-
-        when(factureRepository.findById(1L)).thenReturn(Optional.of(existingFacture));
-
-        // Call the service method
-        Facture result = factureService.updateFacture(updatedFacture);
-
-        // Assert the result
-        assertNotNull(result);
-        assertEquals(updatedFacture.getMontant(), result.getMontant());
-    }
-
-    @Test
-    public void testDeleteFacture() {
-        // Mock data and behavior
-        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
-
-        // Call the service method
-        factureService.deleteFacture(1L);
-
-        // Verify the behavior
-        verify(factureRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    public void testDeleteNonExistingFacture() {
-        // Mock data and behavior
-        when(factureRepository.findById(1L)).thenReturn(Optional.empty()); // Simulate a non-existing facture
-
-        // Call the service method
-        factureService.deleteFacture(1L);
-
-        // Verify the behavior
-        verify(factureRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    public void testUpdateFactureWithNegativeMontant() {
-        // Mock data and behavior
-        Facture existingFacture = new Facture();
-        existingFacture.setIdF(1L);
-        existingFacture.setMontant(100.0);
-        existingFacture.setMontantPayer(30.0);
-
-        Facture updatedFacture = new Facture();
-        updatedFacture.setIdF(1L);
-        updatedFacture.setMontant(-50.0);
-
-        when(factureRepository.findById(1L)).thenReturn(Optional.of(existingFacture));
-
-        // Call the service method
-        Facture result = factureService.updateFacture(updatedFacture);
-
-        // Verify the behavior
-        verify(factureRepository, never()).save(any(Facture.class));
-
-        // Assert the facture remains unchanged
-        assertEquals(100.0, existingFacture.getMontant());
-        assertEquals(30.0, existingFacture.getMontantPayer());
-    }
 }

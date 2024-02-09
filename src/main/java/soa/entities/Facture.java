@@ -62,7 +62,6 @@ public class Facture {
     public void setMontantRestantAPayer(double montantRestantAPayer) {
         this.montantRestantAPayer = montantRestantAPayer;
     }
-
     public double getMontantPayer() {
         return montantPayer;
     }
@@ -75,7 +74,6 @@ public class Facture {
     public void updateMontantPayer(double montant) {
         this.montantPayer += montant;
     }
-
     @Override
     public String toString() {
         return "Facture{" +

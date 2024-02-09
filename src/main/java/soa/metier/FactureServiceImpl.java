@@ -54,6 +54,7 @@ public class FactureServiceImpl implements FactureServiceInterface {
             }
         }
     }
+
     @Override
     public void updateMontantPayer(Long factureId, double montant) {
         Facture facture = factureRepository.findById(factureId).orElse(null);
@@ -63,5 +64,4 @@ public class FactureServiceImpl implements FactureServiceInterface {
             factureRepository.save(facture);
         }
     }
-
 }

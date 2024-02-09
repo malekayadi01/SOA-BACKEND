@@ -97,5 +97,77 @@ public class ReglementTest {
     }
 
     // Add more test methods as needed
+    @Test
+    public void testSetMontantNegative_Exception() {
+        // Arrange
+        Reglement reglement = new Reglement();
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> reglement.setMontant(-50));
+        assertThat(exception.getMessage()).isEqualTo("Montant must be a non-negative value");
+        assertThat(reglement.getMontant()).isEqualTo(0); // S'assurer que montant reste inchangé
+    }
+
+    @Test
+    public void testSetChequeTraiteNumber() {
+        // Arrange
+        Reglement reglement = new Reglement();
+        String newChequeTraiteNumber = "12345";
+
+        // Act
+        reglement.setChequeTraiteNumber(newChequeTraiteNumber);
+
+        // Assert
+        assertThat(reglement.getChequeTraiteNumber()).isEqualTo(newChequeTraiteNumber);
+    }
+
+    @Test
+    public void testSetMontantWithNegativeAmount_Exception() {
+        // Arrange
+        Reglement reglement = new Reglement();
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> reglement.setMontant(-50));
+        assertThat(exception.getMessage()).isEqualTo("Montant must be a non-negative value");
+        assertThat(reglement.getMontant()).isEqualTo(0); // S'assurer que montant reste inchangé
+    }
+
+    @Test
+    public void testUpdateMontantWithPositiveAmount() {
+        // Arrange
+        Reglement reglement = new Reglement();
+        reglement.setMontant(50);
+
+        // Act
+        reglement.setMontant(100);
+
+        // Assert
+        assertThat(reglement.getMontant()).isEqualTo(100);
+    }
+    @Test
+    public void testUpdateMontantAfterPartialRefund() {
+        // Arrange
+        Reglement reglement = new Reglement();
+        reglement.setMontant(100);
+
+        // Act
+        reglement.setMontant(80);
+
+        // Assert
+        assertThat(reglement.getMontant()).isEqualTo(80);
+    }
+    @Test
+    public void testUpdateReglementDate() {
+        // Arrange
+        Reglement reglement = new Reglement();
+        Date newDate = new Date();
+
+        // Act
+        reglement.setDateR(newDate);
+
+        // Assert
+        assertThat(reglement.getDateR()).isEqualTo(newDate);
+    }
+
 
 }

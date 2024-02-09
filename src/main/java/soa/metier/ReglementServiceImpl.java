@@ -1,3 +1,4 @@
+// ReglementServiceImpl.java
 package soa.metier;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,6 @@ public class ReglementServiceImpl implements ReglementServiceInterface {
         // Return the saved règlement
         return savedReglement;
     }
-
 
     @Override
     public List<Reglement> getAllReglements() {
@@ -99,6 +99,4 @@ public class ReglementServiceImpl implements ReglementServiceInterface {
             reglementRepository.deleteById(id);
         }
     }
-
-
 }

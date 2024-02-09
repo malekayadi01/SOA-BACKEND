@@ -81,7 +81,7 @@ public class FactureTest {
     }
 
     @Test
-    public void testUpdateMontantPayerWithNegativeAmount() {
+    public void testUpdateMontantPayerWithNegativeAmount_Exception() {
         // Arrange
         Facture facture = new Facture();
         facture.setMontantPayer(50.0);
@@ -89,6 +89,87 @@ public class FactureTest {
         // Act and Assert
         IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> facture.updateMontantPayer(-30.0));
         assertThat(exception.getMessage()).isEqualTo("Montant must be a non-negative value");
+        assertThat(facture.getMontantPayer()).isEqualTo(50.0); // S'assurer que montantPayer reste inchangé
     }
+
+    @Test
+    public void testUpdateMontantRestantAPayerWithNegativeAmount_Exception() {
+        // Arrange
+        Facture facture = new Facture();
+        facture.setMontantRestantAPayer(80.0);
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> facture.setMontantRestantAPayer(-30.0));
+        assertThat(exception.getMessage()).isEqualTo("MontantRestantAPayer must be a non-negative value");
+        assertThat(facture.getMontantRestantAPayer()).isEqualTo(80.0); // S'assurer que montantRestantAPayer reste inchangé
+    }
+
+    @Test
+    public void testSetMontantRestantAPayerNegative_Exception() {
+        // Arrange
+        Facture facture = new Facture();
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> facture.setMontantRestantAPayer(-30.0));
+        assertThat(exception.getMessage()).isEqualTo("MontantRestantAPayer must be a non-negative value");
+        assertThat(facture.getMontantRestantAPayer()).isEqualTo(0.0); // Ensure that montantRestantAPayer remains unchanged
+    }
+
+
+
+    @Test
+    public void testUpdateMontantWithPositiveAmount() {
+        // Arrange
+        Facture facture = new Facture();
+        facture.setMontant(100.0);
+
+        // Act
+        facture.setMontant(150.0);
+
+        // Assert
+        assertThat(facture.getMontant()).isEqualTo(150.0);
+    }
+
+
+    @Test
+    public void testUpdateMontantRestantAPayerEqualToMontant() {
+        // Arrange
+        Facture facture = new Facture();
+        facture.setMontant(100.0);
+
+        // Act
+        facture.setMontantRestantAPayer(100.0);
+
+        // Assert
+        assertThat(facture.getMontantRestantAPayer()).isEqualTo(100.0);
+    }
+
+    @Test
+    public void testUpdateMontantRestantAPayerNegativeAfterPayment_Exception() {
+        // Arrange
+        Facture facture = new Facture();
+        facture.setMontant(100.0);
+        facture.setMontantRestantAPayer(80.0);
+
+        // Act and Assert
+        IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> facture.setMontantRestantAPayer(-30.0));
+        assertThat(exception.getMessage()).isEqualTo("MontantRestantAPayer must be a non-negative value");
+        assertThat(facture.getMontantRestantAPayer()).isEqualTo(80.0); // Ensure that montantRestantAPayer remains unchanged
+    }
+
+    @Test
+    public void testUpdateMontantPayerEqualToMontant() {
+        // Arrange
+        Facture facture = new Facture();
+        facture.setMontant(100.0);
+
+        // Act
+        facture.setMontantPayer(100.0);
+
+        // Assert
+        assertThat(facture.getMontantPayer()).isEqualTo(100.0);
+    }
+
+
 
 }

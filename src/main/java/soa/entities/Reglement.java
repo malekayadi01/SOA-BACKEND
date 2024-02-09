@@ -67,7 +67,6 @@ public class Reglement {
     public void setMontant(int montant) {
         this.montant = montant;
     }
-
     public PaymentType getType() {
         return type;
     }
